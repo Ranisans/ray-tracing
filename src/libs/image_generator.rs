@@ -1,6 +1,7 @@
 use std::fs::File;
 use std::io::Write;
 use crate::libs::color::{ray_color, write_color};
+use crate::libs::figures::hittable_list::HittableList;
 use crate::libs::figures::sphere::Sphere;
 use crate::libs::ray::Ray;
 use crate::libs::vec3::Vec3;
@@ -37,6 +38,9 @@ impl ImageGenerator {
 
         file.write_fmt(format_args!("P3\n{} {}\n255\n", self.image_width, self.image_height)).expect("Can't create file");
 
+        let mut hittable_list = HittableList::new(None);
+        hittable_list.add(Box::new(Sphere::new(Vec3::new(0.0, 0.0, -1.0), 0.5)));
+        hittable_list.add(Box::new(Sphere::new(Vec3::new(0.0, -100.5, -1.0), 100.0)));
 
         let sphere = Sphere::new(Vec3::new(0.0, 0.0, -1.0), 0.5);
 
@@ -47,7 +51,7 @@ impl ImageGenerator {
 
                 let ray = Ray::new(origin, left_lower_corner + u * horizontal + v * vertical - origin);
 
-                let pixel_color = ray_color(&ray, &sphere);
+                let pixel_color = ray_color(&ray, &hittable_list);
 
                 write_color(&mut file, pixel_color)
             }

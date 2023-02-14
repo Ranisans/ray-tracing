@@ -28,7 +28,7 @@ impl Vec3 {
         self.length_squared().sqrt()
     }
 
-    pub fn dot(&self, rhs: Vec3) -> f64 {
+    pub fn dot(&self, rhs: &Vec3) -> f64 {
         self.x * rhs.x + self.y * rhs.y + self.z * rhs.z
     }
 }
