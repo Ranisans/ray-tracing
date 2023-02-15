@@ -7,13 +7,23 @@ use crate::libs::figures::sphere::Sphere;
 use crate::libs::ray::Ray;
 use crate::libs::vec3::{unit_vector, Vec3};
 
-const MAX_VALUE: f64 = 255.99;
+const MAX_BIT_VALUE: f64 = 256.0;
+const MIN_RANGE_VALUE: f64 = 0.0;
+const MAX_RANGE_VALUE: f64 = 0.999;
+
+fn clamp(x: f64) -> f64 {
+    if x < MIN_RANGE_VALUE { MIN_RANGE_VALUE }
+    else if x > MAX_RANGE_VALUE { MAX_RANGE_VALUE }
+    else { x }
+}
 
 
-pub fn write_color(file: &mut File, pixel_color: Vec3) {
-    let r: u32 = (MAX_VALUE * pixel_color.x()) as u32;
-    let g: u32 = (MAX_VALUE * pixel_color.y()) as u32;
-    let b: u32 = (MAX_VALUE * pixel_color.z()) as u32;
+pub fn write_color(file: &mut File, pixel_color: Vec3, samples_per_pixel: u32) {
+    let scale = 1.0 / samples_per_pixel as f64;
+
+    let r = (MAX_BIT_VALUE * clamp(pixel_color.x() * scale)) as u32;
+    let g = (MAX_BIT_VALUE * clamp(pixel_color.y() * scale)) as u32;
+    let b = (MAX_BIT_VALUE * clamp(pixel_color.z() * scale)) as u32;
 
     file.write_fmt(format_args!("{} {} {}\n", r, g, b)).expect("Cant write to file");
 }

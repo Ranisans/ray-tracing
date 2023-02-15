@@ -9,3 +9,4 @@ edition = "2021"
 debug = true
 
 [dependencies]
+fastrand = "1.9.0"
