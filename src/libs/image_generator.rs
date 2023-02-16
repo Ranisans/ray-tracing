@@ -13,6 +13,7 @@ const IMAGE_WIDTH:u32 = 400;
 const VIEWPORT_HEIGHT:f64 = 2.0;
 const FOCAL_LENGTH:f64 = 1.0;
 const SAMPLES_PER_PIXEL: u32 = 100;
+const MAX_DEPTH: i32 = 50;
 
 pub struct ImageGenerator {
     image_width: u32,
@@ -54,7 +55,7 @@ impl ImageGenerator {
 
                     let ray = camera.get_ray(u, v);
 
-                    pixel_color += ray_color(&ray, &hittable_list);
+                    pixel_color += ray_color(&ray, &hittable_list, MAX_DEPTH);
 
                 }
 

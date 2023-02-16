@@ -1,4 +1,5 @@
 use std::ops;
+use fastrand;
 
 #[derive(Copy, Clone)]
 pub struct Vec3 {
@@ -10,6 +11,10 @@ pub struct Vec3 {
 impl Vec3 {
     pub fn new(x: f64, y: f64, z: f64) -> Self {
         Vec3{x, y, z}
+    }
+
+    pub fn random(min: f64, max: f64) -> Self {
+        Vec3 {x: random_between(min, max), y: random_between(min, max), z: random_between(min, max)}
     }
 
     pub fn null() -> Vec3 { Vec3 {x: 0.0, y: 0.0, z: 0.0} }
@@ -195,4 +200,15 @@ impl ops::Neg for Vec3 {
     }
 }
 
+fn random_between(min: f64, max: f64) -> f64 {
+    fastrand::f64() * (min.abs() + max.abs()) - min.abs()
+}
+
 pub fn unit_vector (vec: Vec3) -> Vec3 { vec / vec.length() }
+
+pub fn random_unit_vector() -> Vec3 {
+    loop {
+        let p = Vec3::random(-1.0, 1.0);
+        if p.length_squared() < 1.0 { return  p }
+    }
+}
