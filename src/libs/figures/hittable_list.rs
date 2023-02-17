@@ -1,16 +1,20 @@
 use crate::libs::figures::hit_record::HitRecord;
 use crate::libs::figures::hittable::Hittable;
+use crate::libs::material::Lambertian;
 use crate::libs::ray::Ray;
+use crate::libs::vec3::Vec3;
 
 pub struct HittableList {
-    pub objects: Vec<Box<dyn Hittable>>
+    pub objects: Vec<Box<dyn Hittable>>,
 }
 
 impl HittableList {
     pub fn new(item: Option<Box<dyn Hittable>>) -> Self {
         match item {
-            None => { HittableList {objects: vec![] } }
-            Some(value) => { HittableList {objects: vec![value] } }
+            None => HittableList { objects: vec![] },
+            Some(value) => HittableList {
+                objects: vec![value],
+            },
         }
     }
 
@@ -25,7 +29,13 @@ impl HittableList {
 
 impl Hittable for HittableList {
     fn hit(&self, ray: &Ray, t_min: f64, t_max: f64, hit_records: &mut HitRecord) -> bool {
-        let mut temp_rec = hit_records.clone();
+        let mut temp_rec = HitRecord {
+            p: Vec3::null(),
+            normal: Vec3::null(),
+            t: 0.0,
+            front_face: false,
+            material: Box::new(Lambertian::new(Vec3::null())),
+        };
 
         let mut hit_anything = false;
         let mut closest_so_far = t_max;
@@ -38,6 +48,6 @@ impl Hittable for HittableList {
             }
         }
 
-        return hit_anything;
+        hit_anything
     }
 }

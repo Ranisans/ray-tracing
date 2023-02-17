@@ -1,16 +1,22 @@
 use crate::libs::figures::hit_record::HitRecord;
 use crate::libs::figures::hittable::Hittable;
+use crate::libs::material::Material;
 use crate::libs::ray::Ray;
 use crate::libs::vec3::Vec3;
 
 pub struct Sphere {
     center: Vec3,
     radius: f64,
+    material: Box<dyn Material>,
 }
 
 impl Sphere {
-    pub fn new(center: Vec3, radius: f64) -> Self {
-        Sphere {center, radius}
+    pub fn new(center: Vec3, radius: f64, material: Box<dyn Material>) -> Self {
+        Sphere {
+            center,
+            radius,
+            material,
+        }
     }
 }
 
@@ -24,7 +30,7 @@ impl Hittable for Sphere {
         let discriminant = half_b.powf(2.0) - a * c;
 
         if discriminant < 0.0 {
-            return false
+            return false;
         }
 
         let sqrtd = discriminant.sqrt();
@@ -33,7 +39,7 @@ impl Hittable for Sphere {
         if root < t_min || t_max < root {
             root = (-half_b + sqrtd) / a;
             if root < t_min || t_max < root {
-                return false
+                return false;
             }
         }
 
@@ -42,6 +48,7 @@ impl Hittable for Sphere {
 
         let outward_normal = (hittable_records.p - self.center) / self.radius;
         hittable_records.set_face_normal(ray, outward_normal);
+        hittable_records.material = self.material.clone_box();
 
         true
     }

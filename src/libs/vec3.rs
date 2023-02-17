@@ -1,5 +1,7 @@
-use std::ops;
 use fastrand;
+use std::ops;
+
+const S: f64 = 1e-8;
 
 #[derive(Copy, Clone)]
 pub struct Vec3 {
@@ -10,20 +12,36 @@ pub struct Vec3 {
 
 impl Vec3 {
     pub fn new(x: f64, y: f64, z: f64) -> Self {
-        Vec3{x, y, z}
+        Vec3 { x, y, z }
     }
 
     pub fn random(min: f64, max: f64) -> Self {
-        Vec3 {x: random_between(min, max), y: random_between(min, max), z: random_between(min, max)}
+        Vec3 {
+            x: random_between(min, max),
+            y: random_between(min, max),
+            z: random_between(min, max),
+        }
     }
 
-    pub fn null() -> Vec3 { Vec3 {x: 0.0, y: 0.0, z: 0.0} }
+    pub fn null() -> Vec3 {
+        Vec3 {
+            x: 0.0,
+            y: 0.0,
+            z: 0.0,
+        }
+    }
 
-    pub fn x(&self) -> f64 {self.x}
+    pub fn x(&self) -> f64 {
+        self.x
+    }
 
-    pub fn y(&self) -> f64 {self.y}
+    pub fn y(&self) -> f64 {
+        self.y
+    }
 
-    pub fn z(&self) -> f64 {self.z}
+    pub fn z(&self) -> f64 {
+        self.z
+    }
 
     pub fn length_squared(&self) -> f64 {
         self.x.powf(2.0) + self.y.powf(2.0) + self.z.powf(2.0)
@@ -36,16 +54,16 @@ impl Vec3 {
     pub fn dot(&self, rhs: &Vec3) -> f64 {
         self.x * rhs.x + self.y * rhs.y + self.z * rhs.z
     }
+
+    pub fn near_zero(&self) -> bool {
+        self.x < S && self.y < S && self.z < S
+    }
 }
 
 impl ops::Add<Vec3> for Vec3 {
     type Output = Vec3;
     fn add(self, rhs: Vec3) -> Self::Output {
-        Vec3::new(
-            self.x + rhs.x,
-            self.y + rhs.y,
-            self.z + rhs.z,
-        )
+        Vec3::new(self.x + rhs.x, self.y + rhs.y, self.z + rhs.z)
     }
 }
 impl ops::AddAssign for Vec3 {
@@ -59,11 +77,7 @@ impl ops::AddAssign for Vec3 {
 impl ops::Add<f64> for Vec3 {
     type Output = Vec3;
     fn add(self, rhs: f64) -> Self::Output {
-        Vec3::new(
-            self.x + rhs,
-            self.y + rhs,
-            self.z + rhs,
-        )
+        Vec3::new(self.x + rhs, self.y + rhs, self.z + rhs)
     }
 }
 
@@ -71,11 +85,7 @@ impl ops::Sub for Vec3 {
     type Output = Vec3;
 
     fn sub(self, rhs: Self) -> Self::Output {
-        Vec3::new(
-            self.x - rhs.x,
-            self.y - rhs.y,
-            self.z - rhs.z,
-        )
+        Vec3::new(self.x - rhs.x, self.y - rhs.y, self.z - rhs.z)
     }
 }
 
@@ -91,33 +101,21 @@ impl ops::Sub<f64> for Vec3 {
     type Output = Vec3;
 
     fn sub(self, rhs: f64) -> Self::Output {
-        Vec3::new(
-            self.x - rhs,
-            self.y - rhs,
-            self.z - rhs,
-        )
+        Vec3::new(self.x - rhs, self.y - rhs, self.z - rhs)
     }
 }
 
 impl ops::Mul for Vec3 {
     type Output = Vec3;
     fn mul(self, rhs: Self) -> Self::Output {
-        Vec3::new(
-            self.x * rhs.x,
-            self.y * rhs.y,
-            self.z * rhs.z,
-        )
+        Vec3::new(self.x * rhs.x, self.y * rhs.y, self.z * rhs.z)
     }
 }
 
 impl ops::Mul<f64> for Vec3 {
     type Output = Vec3;
     fn mul(self, rhs: f64) -> Self::Output {
-        Vec3::new(
-            self.x * rhs,
-            self.y * rhs,
-            self.z * rhs,
-        )
+        Vec3::new(self.x * rhs, self.y * rhs, self.z * rhs)
     }
 }
 
@@ -125,11 +123,7 @@ impl ops::Mul<Vec3> for f64 {
     type Output = Vec3;
 
     fn mul(self, rhs: Vec3) -> Self::Output {
-        Vec3::new(
-            rhs.x * self,
-            rhs.y * self,
-            rhs.z * self,
-        )
+        Vec3::new(rhs.x * self, rhs.y * self, rhs.z * self)
     }
 }
 
@@ -152,11 +146,7 @@ impl ops::MulAssign<f64> for Vec3 {
 impl ops::Div for Vec3 {
     type Output = Vec3;
     fn div(self, rhs: Self) -> Self::Output {
-        Vec3::new(
-            self.x / rhs.x,
-            self.y / rhs.y,
-            self.z / rhs.z,
-        )
+        Vec3::new(self.x / rhs.x, self.y / rhs.y, self.z / rhs.z)
     }
 }
 
@@ -164,11 +154,7 @@ impl ops::Div<f64> for Vec3 {
     type Output = Vec3;
 
     fn div(self, rhs: f64) -> Self::Output {
-        Vec3::new(
-            self.x / rhs,
-            self.y / rhs,
-            self.z / rhs,
-        )
+        Vec3::new(self.x / rhs, self.y / rhs, self.z / rhs)
     }
 }
 
@@ -192,11 +178,7 @@ impl ops::DivAssign<f64> for Vec3 {
 impl ops::Neg for Vec3 {
     type Output = Vec3;
     fn neg(self) -> Self::Output {
-        Vec3::new(
-            -self.x,
-            -self.y,
-            -self.z,
-        )
+        Vec3::new(-self.x, -self.y, -self.z)
     }
 }
 
@@ -204,11 +186,19 @@ fn random_between(min: f64, max: f64) -> f64 {
     fastrand::f64() * (min.abs() + max.abs()) - min.abs()
 }
 
-pub fn unit_vector (vec: Vec3) -> Vec3 { vec / vec.length() }
+pub fn unit_vector(vec: Vec3) -> Vec3 {
+    vec / vec.length()
+}
 
 pub fn random_unit_vector() -> Vec3 {
     loop {
         let p = Vec3::random(-1.0, 1.0);
-        if p.length_squared() < 1.0 { return  p }
+        if p.length_squared() < 1.0 {
+            return p;
+        }
     }
+}
+
+pub fn reflect(v: &Vec3, n: &Vec3) -> Vec3 {
+    *v - 2.0 * v.dot(n) * *n
 }
