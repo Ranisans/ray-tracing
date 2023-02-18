@@ -3,7 +3,7 @@ use crate::libs::figures::hittable::Hittable;
 use crate::libs::figures::hittable_list::HittableList;
 use crate::libs::material::Lambertian;
 use crate::libs::ray::Ray;
-use crate::libs::vec3::{random_unit_vector, unit_vector, Vec3};
+use crate::libs::vec3::{unit_vector, Vec3};
 use std::fs::File;
 use std::io::Write;
 
@@ -12,13 +12,7 @@ const MIN_RANGE_VALUE: f64 = 0.0;
 const MAX_RANGE_VALUE: f64 = 0.999;
 
 fn clamp(x: f64) -> f64 {
-    if x < MIN_RANGE_VALUE {
-        MIN_RANGE_VALUE
-    } else if x > MAX_RANGE_VALUE {
-        MAX_RANGE_VALUE
-    } else {
-        x
-    }
+    x.clamp(MIN_RANGE_VALUE, MAX_RANGE_VALUE)
 }
 
 pub fn write_color(file: &mut File, pixel_color: Vec3, samples_per_pixel: u32) {

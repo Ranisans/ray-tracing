@@ -2,7 +2,7 @@ use crate::libs::camera::Camera;
 use crate::libs::color::{ray_color, write_color};
 use crate::libs::figures::hittable_list::HittableList;
 use crate::libs::figures::sphere::Sphere;
-use crate::libs::material::{Lambertian, Metal};
+use crate::libs::material::{Dielectric, Lambertian, Metal};
 use crate::libs::vec3::Vec3;
 use fastrand;
 use std::fs::File;
@@ -47,9 +47,9 @@ impl ImageGenerator {
         .expect("Can't create file");
 
         let material_ground = Lambertian::new(Vec3::new(0.8, 0.8, 0.0));
-        let material_center = Lambertian::new(Vec3::new(0.7, 0.3, 0.3));
-        let material_left = Metal::new(Vec3::new(0.8, 0.8, 0.8), 0.3);
-        let material_right = Metal::new(Vec3::new(0.8, 0.6, 0.2), 1.0);
+        let material_center = Lambertian::new(Vec3::new(0.1, 0.2, 0.5));
+        let material_left = Dielectric::new(1.5);
+        let material_right = Metal::new(Vec3::new(0.8, 0.6, 0.2), 0.0);
 
         let mut hittable_list = HittableList::new(None);
         hittable_list.add(Box::new(Sphere::new(
@@ -65,6 +65,11 @@ impl ImageGenerator {
         hittable_list.add(Box::new(Sphere::new(
             Vec3::new(-1.0, 0.0, -1.0),
             0.5,
+            Box::new(material_left.clone()),
+        )));
+        hittable_list.add(Box::new(Sphere::new(
+            Vec3::new(-1.0, 0.0, -1.0),
+            -0.4,
             Box::new(material_left),
         )));
         hittable_list.add(Box::new(Sphere::new(
