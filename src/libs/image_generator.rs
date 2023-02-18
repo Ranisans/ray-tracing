@@ -10,8 +10,6 @@ use std::io::Write;
 
 const ASPECT_RATIO: f64 = 16.0 / 9.0;
 const IMAGE_WIDTH: u32 = 400;
-const VIEWPORT_HEIGHT: f64 = 2.0;
-const FOCAL_LENGTH: f64 = 1.0;
 const SAMPLES_PER_PIXEL: u32 = 100;
 const MAX_DEPTH: i32 = 50;
 
@@ -34,9 +32,13 @@ impl ImageGenerator {
     pub fn generate(&self) {
         let output = "output.ppm";
 
-        let viewport_width = ASPECT_RATIO * VIEWPORT_HEIGHT;
-
-        let camera = Camera::new(viewport_width, VIEWPORT_HEIGHT, FOCAL_LENGTH);
+        let camera = Camera::new(
+            Vec3::new(-2.0, 2.0, 1.0),
+            Vec3::new(0.0, 0.0, -1.0),
+            Vec3::new(0.0, 1.0, 0.0),
+            20.0,
+            ASPECT_RATIO,
+        );
 
         let mut file = File::create(output).expect("Unable to create file");
 
@@ -69,7 +71,7 @@ impl ImageGenerator {
         )));
         hittable_list.add(Box::new(Sphere::new(
             Vec3::new(-1.0, 0.0, -1.0),
-            -0.4,
+            -0.45,
             Box::new(material_left),
         )));
         hittable_list.add(Box::new(Sphere::new(
