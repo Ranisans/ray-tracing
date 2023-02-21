@@ -1,5 +1,5 @@
 use crate::libs::figures::hit_record::HitRecord;
-use crate::libs::material::Material;
+use crate::libs::material::Scatterable;
 use crate::libs::ray::Ray;
 use crate::libs::vec3::{random_unit_vector, reflect, unit_vector, Vec3};
 
@@ -17,20 +17,15 @@ impl Metal {
     }
 }
 
-impl Material for Metal {
-    fn scatter(
-        &self,
-        ray_in: &Ray,
-        hit_record: &HitRecord,
-        attenuation: &mut Vec3,
-        scattered: &mut Ray,
-    ) -> bool {
+impl Scatterable for Metal {
+    fn scatter(&self, ray_in: &Ray, hit_record: &HitRecord) -> Option<(Option<Ray>, Vec3)> {
         let reflected = reflect(&unit_vector(ray_in.direction()), &hit_record.normal);
-        *scattered = Ray::new(hit_record.p, reflected + self.fuzz * random_unit_vector());
-        *attenuation = self.albedo;
-        scattered.direction().dot(&hit_record.normal) > 0.0
-    }
-    fn clone_box(&self) -> Box<dyn Material> {
-        Box::new(self.clone())
+        let scattered = Ray::new(hit_record.p, reflected + self.fuzz * random_unit_vector());
+        let attenuation = self.albedo;
+        if scattered.direction().dot(&hit_record.normal) > 0.0 {
+            Some((Some(scattered), attenuation))
+        } else {
+            None
+        }
     }
 }

@@ -7,11 +7,11 @@ use crate::libs::vec3::Vec3;
 pub struct Sphere {
     center: Vec3,
     radius: f64,
-    material: Box<dyn Material>,
+    material: Material,
 }
 
 impl Sphere {
-    pub fn new(center: Vec3, radius: f64, material: Box<dyn Material>) -> Self {
+    pub fn new(center: Vec3, radius: f64, material: Material) -> Self {
         Sphere {
             center,
             radius,
@@ -21,7 +21,7 @@ impl Sphere {
 }
 
 impl Hittable for Sphere {
-    fn hit(&self, ray: &Ray, t_min: f64, t_max: f64, hittable_records: &mut HitRecord) -> bool {
+    fn hit(&self, ray: &Ray, t_min: f64, t_max: f64) -> Option<HitRecord> {
         let oc = ray.origin() - self.center;
         let a = ray.direction().length_squared();
         let half_b = oc.dot(&ray.direction());
@@ -30,26 +30,29 @@ impl Hittable for Sphere {
         let discriminant = half_b.powf(2.0) - a * c;
 
         if discriminant < 0.0 {
-            return false;
+            return None;
         }
 
-        let sqrtd = discriminant.sqrt();
+        let sqrt_d = discriminant.sqrt();
 
-        let mut root = (-half_b - sqrtd) / a;
+        let mut root = (-half_b - sqrt_d) / a;
         if root < t_min || t_max < root {
-            root = (-half_b + sqrtd) / a;
+            root = (-half_b + sqrt_d) / a;
             if root < t_min || t_max < root {
-                return false;
+                return None;
             }
         }
 
-        hittable_records.t = root;
-        hittable_records.p = ray.at(root);
+        let p = ray.at(root);
+        let normal = (p - self.center) / self.radius;
+        let front_face = ray.direction().dot(&normal) < 0.0;
 
-        let outward_normal = (hittable_records.p - self.center) / self.radius;
-        hittable_records.set_face_normal(ray, outward_normal);
-        hittable_records.material = self.material.clone_box();
-
-        true
+        Some(HitRecord {
+            t: root,
+            p,
+            material: &self.material,
+            normal: if front_face { normal } else { -normal },
+            front_face,
+        })
     }
 }

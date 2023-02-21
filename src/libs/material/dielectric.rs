@@ -1,5 +1,5 @@
 use crate::libs::figures::hit_record::HitRecord;
-use crate::libs::material::Material;
+use crate::libs::material::Scatterable;
 use crate::libs::ray::Ray;
 use crate::libs::vec3::{reflect, refract, unit_vector, Vec3};
 
@@ -20,15 +20,9 @@ impl Dielectric {
     }
 }
 
-impl Material for Dielectric {
-    fn scatter(
-        &self,
-        ray_in: &Ray,
-        hit_record: &HitRecord,
-        attenuation: &mut Vec3,
-        scattered: &mut Ray,
-    ) -> bool {
-        *attenuation = Vec3::new(1.0, 1.0, 1.0);
+impl Scatterable for Dielectric {
+    fn scatter(&self, ray_in: &Ray, hit_record: &HitRecord) -> Option<(Option<Ray>, Vec3)> {
+        let attenuation = Vec3::new(1.0, 1.0, 1.0);
         let refraction_ration = if hit_record.front_face {
             1.0 / self.ir
         } else {
@@ -49,11 +43,8 @@ impl Material for Dielectric {
             refract(&unit_direction, &hit_record.normal, refraction_ration)
         };
 
-        *scattered = Ray::new(hit_record.p, direction);
+        let scattered = Ray::new(hit_record.p, direction);
 
-        true
-    }
-    fn clone_box(&self) -> Box<dyn Material> {
-        Box::new(self.clone())
+        Some((Some(scattered), attenuation))
     }
 }

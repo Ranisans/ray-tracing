@@ -1,15 +1,14 @@
+use crate::libs::figures::figures::Figures;
 use crate::libs::figures::hit_record::HitRecord;
 use crate::libs::figures::hittable::Hittable;
-use crate::libs::material::Lambertian;
 use crate::libs::ray::Ray;
-use crate::libs::vec3::Vec3;
 
 pub struct HittableList {
-    pub objects: Vec<Box<dyn Hittable>>,
+    pub objects: Vec<Figures>,
 }
 
 impl HittableList {
-    pub fn new(item: Option<Box<dyn Hittable>>) -> Self {
+    pub fn new(item: Option<Figures>) -> Self {
         match item {
             None => HittableList { objects: vec![] },
             Some(value) => HittableList {
@@ -18,7 +17,7 @@ impl HittableList {
         }
     }
 
-    pub fn add(&mut self, item: Box<dyn Hittable>) {
+    pub fn add(&mut self, item: Figures) {
         self.objects.push(item)
     }
 
@@ -28,26 +27,17 @@ impl HittableList {
 }
 
 impl Hittable for HittableList {
-    fn hit(&self, ray: &Ray, t_min: f64, t_max: f64, hit_records: &mut HitRecord) -> bool {
-        let mut temp_rec = HitRecord {
-            p: Vec3::null(),
-            normal: Vec3::null(),
-            t: 0.0,
-            front_face: false,
-            material: Box::new(Lambertian::new(Vec3::null())),
-        };
-
-        let mut hit_anything = false;
+    fn hit(&self, ray: &Ray, t_min: f64, t_max: f64) -> Option<HitRecord> {
         let mut closest_so_far = t_max;
+        let mut hit_record = None;
 
-        for item in &self.objects {
-            if item.hit(ray, t_min, closest_so_far, &mut temp_rec) {
-                hit_anything = true;
-                closest_so_far = temp_rec.t;
-                *hit_records = temp_rec.clone();
+        for object in &self.objects {
+            if let Some(hit) = object.hit(ray, t_min, closest_so_far) {
+                closest_so_far = hit.t;
+                hit_record = Some(hit)
             }
         }
 
-        hit_anything
+        hit_record
     }
 }

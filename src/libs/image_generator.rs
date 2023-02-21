@@ -1,8 +1,9 @@
 use crate::libs::camera::Camera;
 use crate::libs::color::{ray_color, write_color};
+use crate::libs::figures::figures::Figures;
 use crate::libs::figures::hittable_list::HittableList;
 use crate::libs::figures::sphere::Sphere;
-use crate::libs::material::{Dielectric, Lambertian, Metal};
+use crate::libs::material::{Dielectric, Lambertian, Material, Metal};
 use crate::libs::vec3::Vec3;
 use fastrand;
 use std::fs::File;
@@ -62,30 +63,30 @@ impl ImageGenerator {
         let material_right = Metal::new(Vec3::new(0.8, 0.6, 0.2), 0.0);
 
         let mut hittable_list = HittableList::new(None);
-        hittable_list.add(Box::new(Sphere::new(
+        hittable_list.add(Figures::Sphere(Sphere::new(
             Vec3::new(0.0, -100.5, -1.0),
             100.0,
-            Box::new(material_ground),
+            Material::Lambertial(material_ground),
         )));
-        hittable_list.add(Box::new(Sphere::new(
+        hittable_list.add(Figures::Sphere(Sphere::new(
             Vec3::new(0.0, 0.0, -1.0),
             0.5,
-            Box::new(material_center),
+            Material::Lambertial(material_center),
         )));
-        hittable_list.add(Box::new(Sphere::new(
+        hittable_list.add(Figures::Sphere(Sphere::new(
             Vec3::new(-1.0, 0.0, -1.0),
             0.5,
-            Box::new(material_left.clone()),
+            Material::Dielectric(material_left.clone()),
         )));
-        hittable_list.add(Box::new(Sphere::new(
+        hittable_list.add(Figures::Sphere(Sphere::new(
             Vec3::new(-1.0, 0.0, -1.0),
             -0.45,
-            Box::new(material_left),
+            Material::Dielectric(material_left),
         )));
-        hittable_list.add(Box::new(Sphere::new(
+        hittable_list.add(Figures::Sphere(Sphere::new(
             Vec3::new(1.0, 0.0, -1.0),
             0.5,
-            Box::new(material_right),
+            Material::Metal(material_right),
         )));
 
         for y in (0..self.image_height).rev() {
