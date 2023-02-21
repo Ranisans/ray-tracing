@@ -1,27 +1,30 @@
+use fastrand;
+use rayon::prelude::*;
+
 use crate::libs::camera::Camera;
-use crate::libs::color::{ray_color, write_color};
+use crate::libs::color::ray_color;
 use crate::libs::figures::figures::Figures;
 use crate::libs::figures::hittable_list::HittableList;
 use crate::libs::figures::sphere::Sphere;
 use crate::libs::material::{Dielectric, Lambertian, Material, Metal};
 use crate::libs::vec3::Vec3;
-use fastrand;
-use std::fs::File;
-use std::io::Write;
 
 const ASPECT_RATIO: f64 = 16.0 / 9.0;
-const IMAGE_WIDTH: u32 = 400;
+const IMAGE_WIDTH: usize = 400;
 const SAMPLES_PER_PIXEL: u32 = 100;
 const MAX_DEPTH: i32 = 50;
+const MAX_BIT_VALUE: f64 = 256.0;
+const MIN_RANGE_VALUE: f64 = 0.0;
+const MAX_RANGE_VALUE: f64 = 0.999;
 
 pub struct ImageGenerator {
-    image_width: u32,
-    image_height: u32,
+    image_width: usize,
+    image_height: usize,
 }
 
 impl Default for ImageGenerator {
     fn default() -> Self {
-        let image_height = (IMAGE_WIDTH as f64 / ASPECT_RATIO) as u32;
+        let image_height = (IMAGE_WIDTH as f64 / ASPECT_RATIO) as usize;
         ImageGenerator {
             image_height,
             image_width: IMAGE_WIDTH,
@@ -31,8 +34,6 @@ impl Default for ImageGenerator {
 
 impl ImageGenerator {
     pub fn generate(&self) {
-        let output = "output.ppm";
-
         let look_from = Vec3::new(3.0, 3.0, 2.0);
         let look_at = Vec3::new(0.0, 0.0, -1.0);
         let v_up = Vec3::new(0.0, 1.0, 0.0);
@@ -48,14 +49,6 @@ impl ImageGenerator {
             aperture,
             dist_to_focus,
         );
-
-        let mut file = File::create(output).expect("Unable to create file");
-
-        file.write_fmt(format_args!(
-            "P3\n{} {}\n255\n",
-            self.image_width, self.image_height
-        ))
-        .expect("Can't create file");
 
         let material_ground = Lambertian::new(Vec3::new(0.8, 0.8, 0.0));
         let material_center = Lambertian::new(Vec3::new(0.1, 0.2, 0.5));
@@ -89,21 +82,55 @@ impl ImageGenerator {
             Material::Metal(material_right),
         )));
 
-        for y in (0..self.image_height).rev() {
-            for x in 0..self.image_width {
-                let mut pixel_color = Vec3::null();
+        let mut pixels = vec![0; (self.image_height * self.image_width * 3) as usize];
 
-                for _ in 0..SAMPLES_PER_PIXEL {
-                    let u = (x as f64 + fastrand::f64()) / (self.image_width as f64 - 1.0);
-                    let v = (y as f64 + fastrand::f64()) / (self.image_height as f64 - 1.0);
+        let parts: Vec<(usize, &mut [u8])> = pixels.chunks_mut(3).enumerate().collect();
 
-                    let ray = camera.get_ray(u, v);
+        parts.into_par_iter().for_each(|(i, pixel)| {
+            let mut pixel_color = Vec3::null();
+            let x = i % self.image_width;
+            let y = self.image_height - i / self.image_width;
 
-                    pixel_color += ray_color(&ray, &hittable_list, MAX_DEPTH);
-                }
+            for _ in 0..SAMPLES_PER_PIXEL {
+                let u = (x as f64 + fastrand::f64()) / (self.image_width as f64 - 1.0);
+                let v = (y as f64 + fastrand::f64()) / (self.image_height as f64 - 1.0);
 
-                write_color(&mut file, pixel_color, SAMPLES_PER_PIXEL);
+                let ray = camera.get_ray(u, v);
+
+                pixel_color += ray_color(&ray, &hittable_list, MAX_DEPTH);
             }
-        }
+
+            let color = vec3_to_array(&pixel_color);
+            pixel[0] = color[0];
+            pixel[1] = color[1];
+            pixel[2] = color[2];
+        });
+
+        self.write_image(&pixels)
     }
+
+    fn write_image(&self, pixels: &[u8]) {
+        image::save_buffer(
+            "output.png",
+            pixels,
+            self.image_width as u32,
+            self.image_height as u32,
+            image::ColorType::Rgb8,
+        )
+        .unwrap();
+    }
+}
+
+fn vec3_to_array(pixel_color: &Vec3) -> [u8; 3] {
+    let scale = 1.0 / SAMPLES_PER_PIXEL as f64;
+
+    let r = (MAX_BIT_VALUE * clamp(pixel_color.x() * scale).sqrt()) as u8;
+    let g = (MAX_BIT_VALUE * clamp(pixel_color.y() * scale).sqrt()) as u8;
+    let b = (MAX_BIT_VALUE * clamp(pixel_color.z() * scale).sqrt()) as u8;
+
+    [r, g, b]
+}
+
+fn clamp(x: f64) -> f64 {
+    x.clamp(MIN_RANGE_VALUE, MAX_RANGE_VALUE)
 }
