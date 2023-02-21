@@ -82,7 +82,7 @@ impl ImageGenerator {
             Material::Metal(material_right),
         )));
 
-        let mut pixels = vec![0; (self.image_height * self.image_width * 3) as usize];
+        let mut pixels = vec![0; self.image_height * self.image_width * 3];
 
         let parts: Vec<(usize, &mut [u8])> = pixels.chunks_mut(3).enumerate().collect();
 
