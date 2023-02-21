@@ -23,6 +23,14 @@ impl Vec3 {
         }
     }
 
+    pub fn simple_random() -> Vec3 {
+        Vec3 {
+            x: fastrand::f64(),
+            y: fastrand::f64(),
+            z: fastrand::f64(),
+        }
+    }
+
     pub fn null() -> Vec3 {
         Vec3 {
             x: 0.0,
@@ -182,7 +190,7 @@ impl ops::Neg for Vec3 {
     }
 }
 
-fn random_between(min: f64, max: f64) -> f64 {
+pub fn random_between(min: f64, max: f64) -> f64 {
     fastrand::f64() * (min.abs() + max.abs()) - min.abs()
 }
 
