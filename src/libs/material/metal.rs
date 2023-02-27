@@ -20,7 +20,11 @@ impl Metal {
 impl Scatterable for Metal {
     fn scatter(&self, ray_in: &Ray, hit_record: &HitRecord) -> Option<(Option<Ray>, Vec3)> {
         let reflected = reflect(&unit_vector(ray_in.direction()), &hit_record.normal);
-        let scattered = Ray::new(hit_record.p, reflected + self.fuzz * random_unit_vector());
+        let scattered = Ray::new(
+            hit_record.p,
+            reflected + self.fuzz * random_unit_vector(),
+            Some(ray_in.time()),
+        );
         let attenuation = self.albedo;
         if scattered.direction().dot(&hit_record.normal) > 0.0 {
             Some((Some(scattered), attenuation))

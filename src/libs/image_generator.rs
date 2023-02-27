@@ -5,13 +5,14 @@ use crate::libs::camera::Camera;
 use crate::libs::color::ray_color;
 use crate::libs::figures::figures::Figures;
 use crate::libs::figures::hittable_list::HittableList;
+use crate::libs::figures::moving_spheres::MovingSpheres;
 use crate::libs::figures::sphere::Sphere;
 use crate::libs::material::{Dielectric, Lambertian, Material, Metal};
 use crate::libs::vec3::{random_between, Vec3};
 
-const ASPECT_RATIO: f64 = 3.0 / 2.0;
-const IMAGE_WIDTH: usize = 1200;
-const SAMPLES_PER_PIXEL: u32 = 500;
+const ASPECT_RATIO: f64 = 16.0 / 9.0;
+const IMAGE_WIDTH: usize = 400;
+const SAMPLES_PER_PIXEL: u32 = 100;
 const MAX_DEPTH: i32 = 50;
 const MAX_BIT_VALUE: f64 = 256.0;
 const MIN_RANGE_VALUE: f64 = 0.0;
@@ -48,6 +49,8 @@ impl ImageGenerator {
             ASPECT_RATIO,
             aperture,
             dist_to_focus,
+            Some(0.0),
+            Some(1.0),
         );
 
         let hittable_list = random_scene();
@@ -131,7 +134,10 @@ fn random_scene() -> HittableList {
                     // diffuse
                     let albedo = Vec3::simple_random() * Vec3::simple_random();
                     let material = Material::Lambertial(Lambertian::new(albedo));
-                    hittable_list.add(Figures::Sphere(Sphere::new(center, 0.2, material)));
+                    let center_2 = center + Vec3::new(0.0, random_between(0.0, 0.5), 0.0);
+                    hittable_list.add(Figures::MovingSpheres(MovingSpheres::new(
+                        center, center_2, 0.0, 1.0, 0.2, material,
+                    )));
                 } else if chose_mat < 0.95 {
                     // metal
                     let albedo = Vec3::random(0.2, 1.0);

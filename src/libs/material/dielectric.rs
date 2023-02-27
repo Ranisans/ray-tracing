@@ -43,7 +43,7 @@ impl Scatterable for Dielectric {
             refract(&unit_direction, &hit_record.normal, refraction_ration)
         };
 
-        let scattered = Ray::new(hit_record.p, direction);
+        let scattered = Ray::new(hit_record.p, direction, Some(ray_in.time()));
 
         Some((Some(scattered), attenuation))
     }
